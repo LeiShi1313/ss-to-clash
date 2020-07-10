@@ -20,6 +20,7 @@ emojis = {
     '新加坡': '🇸🇬',
     '印度': '🇮🇳',
     '巴西': '🇧🇷',
+    '其他': '😯'
 }
 
 header = '''
@@ -101,6 +102,11 @@ def ss_decode(subs: list) -> dict:
                         clash_rule['name'] = emoji + '  ' + clash_rule['name']
                         group_by_country[c].append(clash_rule)
                         count += 1
+                        break
+                else:
+                    group_by_country['其他'].append(clash_rule)
+                    count += 1
+
             except:
                 traceback.print_exc()
                 print(line)
