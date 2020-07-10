@@ -2,8 +2,8 @@ import re
 import typing
 import base64
 import argparse
-import requests
 import traceback
+from urllib import request
 from urllib.parse import unquote
 from collections import defaultdict
 
@@ -114,8 +114,8 @@ def ss_decode(subs: list) -> dict:
     return group_by_country
 
 def write_rule_from_list(f: typing.IO, list_url: str, rule_name: str):
-    remote_rule = requests.get(list_url)
-    for line in remote_rule.text.split('\n'):
+    remote_rules = request.urlopen(list_url).read().decode('utf-8')
+    for line in remote_rules.split('\n'):
         if line.startswith('#'):
             f.write(f'{line}\n')
         elif line.startswith('USER-AGENT'):
