@@ -3,5 +3,5 @@
 ## Usage 
 
 ```
-python trans.py [SS-links] 
+python decode.py [SS-links] clash
 ```
