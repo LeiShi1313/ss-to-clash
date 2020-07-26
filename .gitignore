@@ -129,5 +129,4 @@ dmypy.json
 .pyre/
 
 *.txt
-*.yml
-*.yaml
+clash*.yml

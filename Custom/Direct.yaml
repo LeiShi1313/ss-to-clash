@@ -1,0 +1,17 @@
+payload:
+# DIRECT custom rules
+- DOMAIN-SUFFIX,zhihu.com
+- DOMAIN-SUFFIX,tencent-cloud.net
+- DOMAIN-SUFFIX,tencent.com
+- DOMAIN-SUFFIX,tencentmind.com
+- DOMAIN-SUFFIX,tenpay.com
+- DOMAIN-SUFFIX,wechat.com
+- DOMAIN-SUFFIX,weixin.com
+- DOMAIN-SUFFIX,weixin.qq.com
+- DOMAIN-SUFFIX,weiyun.com
+- DOMAIN-SUFFIX,weibo.com
+- IP-CIDR,49.4.0.0/16
+- IP-CIDR,49.51.0.0/16
+- IP-CIDR,36.51.0.0/16
+- IP-CIDR,211.152.0.0/16
+- IP-CIDR,203.119.0.0/16

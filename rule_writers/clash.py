@@ -26,36 +26,28 @@ dns:
     - 1.1.1.1
 '''
 
-local_and_other_rules = '''
-# Local Area Network
-- IP-CIDR,192.168.0.0/16,DIRECT
-- IP-CIDR,10.0.0.0/8,DIRECT
-- IP-CIDR,172.16.0.0/12,DIRECT
-- IP-CIDR,127.0.0.0/8,DIRECT
-- IP-CIDR,100.64.0.0/10,DIRECT
- 
-# 其他流量
-- MATCH,Match
-'''
-
-BAN_RULE_PROVIDERS = {
+DIRECT_RULE_PROVIDERS = {
+    '🏠 LocalAreaNetwork': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/LocalAreaNetwork.yaml',
+    '🏠 DirectCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Direct.yaml',
+}
+REJECT_RULE_PROVIDERS = {
     '🈲️ BanAD': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanAD.yaml',
     '🈲️ BanEasyList': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyList.yaml',
     '🈲️ BanEasyListChina': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyListChina.yaml',
-    '🈲️ BanProgramAD': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanProgramAD.yaml'
+    '🈲️ BanProgramAD': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanProgramAD.yaml',
+    '🈲️ BanCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Ban.yaml',
 }
 CHINA_RULE_PROVIDERS = {
-    '🀄️ ChinaDomain': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaDomain.yaml',
-    '🀄️ ChinaCompanyIp': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaCompanyIp.yaml',
-    '🀄️ ChinaIp': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaIp.yaml'
+    # '🀄️ ChinaDomain': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaDomain.yaml',
+    # '🀄️ ChinaCompanyIp': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaCompanyIp.yaml',
+    # '🀄️ ChinaIp': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaIp.yaml',
+    '🀄️ ChinaCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/China.yaml',
 }
-GFW_RULE_PROVIDERS = {
+PROXY_RULE_PROVIDERS = {
     '✈️ ProxyLite': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyLite.yaml',
     '✈️ ProxyGFWList': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyGFWlist.yaml',
-    '✈️ ProxyMedia': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyMedia.yaml'
-}
-LOCAL_RULE_PROVIDERS = {
-    '🏠 LocalAreaNetwork': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/LocalAreaNetwork.yaml'
+    '✈️ ProxyMedia': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyMedia.yaml',
+    '✈️ ProxyCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Proxy.yaml',
 }
 
 
@@ -123,7 +115,7 @@ class ClashWriter(RuleWriter):
 
     def write_rule_providers(self, f: typing.IO):
         f.write('rule-providers:\n')
-        for rule_providers in [BAN_RULE_PROVIDERS, CHINA_RULE_PROVIDERS, GFW_RULE_PROVIDERS, LOCAL_RULE_PROVIDERS]:
+        for rule_providers in [REJECT_RULE_PROVIDERS, CHINA_RULE_PROVIDERS, PROXY_RULE_PROVIDERS, DIRECT_RULE_PROVIDERS]:
             for name, url in rule_providers.items():
                 f.write(f'  {name}:\n')
                 f.write(f'    type: http\n')
@@ -136,18 +128,18 @@ class ClashWriter(RuleWriter):
     def write_rules(self, f: typing.IO):
         f.write('rules:\n')
 
-        for name in BAN_RULE_PROVIDERS.keys():
+        for name in REJECT_RULE_PROVIDERS.keys():
             f.write(f'# {name}\n')
             f.write(f'- RULE-SET,{name},Reject\n')
+        for name in DIRECT_RULE_PROVIDERS.keys():
+            f.write(f'# {name}\n')
+            f.write(f'- RULE-SET,{name},DIRECT\n')
         for name in CHINA_RULE_PROVIDERS.keys():
             f.write(f'# {name}\n')
             f.write(f'- RULE-SET,{name},China\n')
-        for name in GFW_RULE_PROVIDERS.keys():
+        for name in PROXY_RULE_PROVIDERS.keys():
             f.write(f'# {name}\n')
             f.write(f'- RULE-SET,{name},Proxy\n')
-        for name in LOCAL_RULE_PROVIDERS.keys():
-            f.write(f'# {name}\n')
-            f.write(f'- RULE-SET,{name},DIRECT\n')
 
         f.write('# 其他流量\n')
         f.write('- MATCH,Match\n')
