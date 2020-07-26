@@ -35,7 +35,7 @@ REJECT_RULE_PROVIDERS = {
     '🈲️ BanEasyList': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyList.yaml',
     '🈲️ BanEasyListChina': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyListChina.yaml',
     '🈲️ BanProgramAD': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanProgramAD.yaml',
-    '🈲️ BanCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Ban.yaml',
+    # '🈲️ BanCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Ban.yaml',
 }
 CHINA_RULE_PROVIDERS = {
     # '🀄️ ChinaDomain': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaDomain.yaml',
@@ -47,7 +47,7 @@ PROXY_RULE_PROVIDERS = {
     '✈️ ProxyLite': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyLite.yaml',
     '✈️ ProxyGFWList': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyGFWlist.yaml',
     '✈️ ProxyMedia': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyMedia.yaml',
-    '✈️ ProxyCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Proxy.yaml',
+    # '✈️ ProxyCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Proxy.yaml',
 }
 
 
