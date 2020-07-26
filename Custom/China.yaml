@@ -18,6 +18,8 @@ payload:
 - DOMAIN-SUFFIX,biligame.net
 - DOMAIN-SUFFIX,biligame.com
 - DOMAIN-SUFFIX,bigfunapp.cn
+- DOMAIN-SUFFIX,bigfun.cn
+- IP-CIDR,203.107.0.0/16
 # > HunanTV
 # USER-AGENT,MGTV*
 - DOMAIN-SUFFIX,hitv.com

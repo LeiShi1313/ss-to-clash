@@ -48,9 +48,11 @@ if __name__ == '__main__':
     clash_arg_group = parser.add_argument_group('clash')
     clash_arg_group.add_argument('--output_name', type=str, default=None,
                         help='导出的配置格式名称')
-    clash_arg_group.add_argument('--mode', type=str, default='select',
+    clash_arg_group.add_argument('--mode', type=str, default='Rule',
+                        help='clash配置模式，默认Rule，可选Script')
+    clash_arg_group.add_argument('--node-mode', type=str, default='select',
                         help='clash负载均衡配置，默认select，可选fallback/urltest')
-    clash_arg_group.add_argument('--interval', type=int, default=600,
+    clash_arg_group.add_argument('--node-interval', type=int, default=600,
                         help='负载均衡的间隔，在mode选择fallback/urltest下使用，默认10分钟')
     clash_arg_group.add_argument('--rule-provider-interval', type=int, default=86400,
                         help='Rule provider间隔，默认1天')
