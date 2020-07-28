@@ -10,6 +10,7 @@ payload:
 - DOMAIN-SUFFIX,weixin.qq.com
 - DOMAIN-SUFFIX,weiyun.com
 - DOMAIN-SUFFIX,weibo.com
+- DOMAIN-SUFFIX,clashcloud.tech
 - IP-CIDR,49.4.0.0/16
 - IP-CIDR,49.51.0.0/16
 - IP-CIDR,36.51.0.0/16
