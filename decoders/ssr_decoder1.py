@@ -6,10 +6,11 @@ from urllib.parse import urlparse, parse_qs
 
 from rules import RuleType, SSRRule, RuleName
 from decoders.base import Decoder
+from utils import dns_query
 
 
 class SSRDecoder1(Decoder):
-    def decode(self, sub: str) -> SSRRule:
+    def decode(self, sub: str, **kwargs) -> SSRRule:
         if sub.startswith('ssr://'):
             try:
                 b64_decoded = urlsafe_b64decode(sub[6:]+'==').decode('utf-8')
@@ -22,16 +23,16 @@ class SSRDecoder1(Decoder):
                 extram_params = parse_qs(urlparse(b64_decoded).query)
                 try:
                     return SSRRule(
-                        name=RuleName(urlsafe_b64decode(extram_params.get('remarks')[0]+'==').decode('utf-8')),
-                        server=m.groupdict()['server'],
-                        port=int(m.groupdict()['port']),
+                        name=RuleName(urlsafe_b64decode(extram_params.get('remarks')[0]+'==').decode('utf-8'), RuleType.SSR),
                         type=RuleType.SSR,
+                        server=dns_query(m.groupdict()['server']) if kwargs.get('use_ip', False) else m.groupdict()['server'],
+                        port=int(m.groupdict()['port']),
                         cipher=m.groupdict()['cipher'],
                         password=m.groupdict()['password'],
                         protocol=m.groupdict()['protocol'],
                         obfs=m.groupdict()['obfs'],
-                        protocol_param=extram_params.get('protoparam'),
-                        obfs_param=extram_params.get('obfs[aram')
+                        protocolparam=extram_params.get('protoparam', ''),
+                        obfsparam=urlsafe_b64decode(extram_params.get('obfsparam')[0]+'==').decode('utf-8')
                     )
                 except:
                     traceback.print_exc()

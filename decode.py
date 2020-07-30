@@ -7,18 +7,24 @@ from urllib import request
 from urllib.parse import unquote
 from collections import defaultdict
 
+from utils import str2bool
 from decoders.base import Decoder
 from rule_writers.base import RuleWriter
 from rules import RuleType, RuleBase, SSRule, SSRRule, Region
 
 
-def decode_subs(subs: list):
+def decode_subs(subs: list, **kwargs):
     decoded_subs = []
+    hashed_subs = set()
     print(f"Decoding a total of {len(subs)} subs.")
+    if kwargs.get('use_ip'):
+        print(f"Use ip turned on, this will take a while...")
     for line in subs:
         for decoder in Decoder.decoders:
-            if (rule := decoder.decode(line)) is not None:
-                decoded_subs.append(rule)
+            if (rule := decoder.decode(line, **kwargs)) is not None:
+                if rule.get_hash() not in hashed_subs:
+                    hashed_subs.add(rule.get_hash())
+                    decoded_subs.append(rule)
                 break
         else:
             print(f"No decoder found for sub: {line}")
@@ -33,7 +39,7 @@ def main(args):
             if len(line) > 1:
                 subs.append(line)
 
-    rules = decode_subs(subs)
+    rules = decode_subs(subs, **vars(args))
     RuleWriter.rule_writers[args.output_type].write(rules, **vars(args))
     # write_clash(ss_decode(subs), mode, interval)
 
@@ -56,5 +62,8 @@ if __name__ == '__main__':
                         help='负载均衡的间隔，在mode选择fallback/urltest下使用，默认10分钟')
     clash_arg_group.add_argument('--rule-provider-interval', type=int, default=86400,
                         help='Rule provider间隔，默认1天')
+    clash_arg_group.add_argument('--use-ip', type=str2bool, nargs='?', const=True, default=False,
+                        help='是否查询并使用服务器IP地址')
+
 
     main(parser.parse_args())

@@ -39,10 +39,11 @@ class Region(Enum):
 
 
 class RuleName:
-    def __init__(self, name):
+    def __init__(self, name, rule_type: RuleType):
         self.original_name = name.strip(" \t\n")
         self.region = RuleName.get_region(name)
         self.name = RuleName.stripe_name(name)
+        self.rule_type = rule_type
 
     @classmethod
     def get_region(cls, name: str) -> Region:
@@ -70,21 +71,24 @@ class RuleName:
 
     @classmethod
     def stripe_name(cls, name: str) -> str:
-        replace_rules = ['CNIX - ', 'ssrcloud - ', '\t']
+        replace_rules = ['CNIX - ', 'ssrcloud - ', '\t', '/']
         for rule in replace_rules:
             name = name.replace(rule, '')
         return name.strip()
 
     def __repr__(self) -> str:
-        return f"{self.region.value[0]} {self.name}"
+        return f"{self.region.value[0]} {self.name} {self.rule_type.value.upper()}"
 
 
 @dataclass
 class RuleBase:
     name: RuleName
+    type: RuleType
     server: str
     port: int
-    type: RuleType
+
+    def get_hash(self):
+        return hash(f'{self.type}://{self.server}:{self.port}')
 
 
 @dataclass
@@ -109,8 +113,8 @@ class SSRRule(RuleBase):
     password: str
     protocol: str
     obfs: str
-    protocol_param: str = None
-    obfs_param: str = None
+    protocolparam: str = ''
+    obfsparam: str = None
 
     def __repr__(self):
         return json.dumps({
