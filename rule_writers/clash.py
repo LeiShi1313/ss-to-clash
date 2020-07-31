@@ -2,6 +2,7 @@ import typing
 from urllib import request
 from collections import defaultdict
 
+from utils import get_rules
 from rules import Region, RuleBase
 from rule_writers.base import RuleWriter
 
@@ -42,9 +43,9 @@ DIRECT_RULE_PROVIDERS = {
 }
 REJECT_RULE_PROVIDERS = {
     '🈲️ BanAD': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanAD.yaml',
-    '🈲️ BanEasyList': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyList.yaml',
-    '🈲️ BanEasyListChina': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyListChina.yaml',
-    '🈲️ BanProgramAD': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanProgramAD.yaml',
+    # '🈲️ BanEasyList': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyList.yaml',
+    # '🈲️ BanEasyListChina': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyListChina.yaml',
+    # '🈲️ BanProgramAD': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanProgramAD.yaml',
     # '🈲️ BanCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Ban.yaml',
 }
 CHINA_RULE_PROVIDERS = {
@@ -170,18 +171,14 @@ class ClashWriter(RuleWriter):
     def write_rules(self, f: typing.IO):
         f.write('rules:\n')
 
-        for name in DIRECT_RULE_PROVIDERS.keys():
-            f.write(f'# {name}\n')
-            f.write(f'- RULE-SET,{name},DIRECT\n')
-        for name in REJECT_RULE_PROVIDERS.keys():
-            f.write(f'# {name}\n')
-            f.write(f'- RULE-SET,{name},Reject\n')
-        for name in CHINA_RULE_PROVIDERS.keys():
-            f.write(f'# {name}\n')
-            f.write(f'- RULE-SET,{name},China\n')
-        for name in PROXY_RULE_PROVIDERS.keys():
-            f.write(f'# {name}\n')
-            f.write(f'- RULE-SET,{name},Proxy\n')
+        for dest, rule_providers in zip(['DIRECT', 'Reject', 'China', 'Proxy'], [DIRECT_RULE_PROVIDERS, REJECT_RULE_PROVIDERS, CHINA_RULE_PROVIDERS, PROXY_RULE_PROVIDERS]):
+            for name, rule_link in rule_providers.items():
+                f.write(f'# {name}\n')
+                if not self.args.get('no_rule_set'):
+                    f.write(f'- RULE-SET,{name},{dest}\n')
+                else:
+                    for rule in get_rules(rule_link, dest, 'ip' in name.lower()):
+                        f.write(f'{rule}\n')
 
         f.write('# 其他流量\n')
         f.write('- MATCH,Match\n')

@@ -52,7 +52,7 @@ if __name__ == '__main__':
                         help='导出的配置格式，现支持clash')
     
     clash_arg_group = parser.add_argument_group('clash')
-    clash_arg_group.add_argument('--output_name', type=str, default=None,
+    clash_arg_group.add_argument('--output-name', type=str, default=None,
                         help='导出的配置格式名称')
     clash_arg_group.add_argument('--mode', type=str, default='Rule',
                         help='clash配置模式，默认Rule，可选Script')
@@ -64,6 +64,8 @@ if __name__ == '__main__':
                         help='Rule provider间隔，默认1天')
     clash_arg_group.add_argument('--use-ip', type=str2bool, nargs='?', const=True, default=False,
                         help='是否查询并使用服务器IP地址')
+    clash_arg_group.add_argument('--no-rule-set', type=str2bool, nargs='?', const=True, default=False,
+                        help='是否使用RULE-SET')
 
 
     main(parser.parse_args())

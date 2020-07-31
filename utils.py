@@ -18,13 +18,20 @@ def str2bool(v):
 
 def write_rule_from_list(self, f: typing.IO, url: str, rule_name: str):
     remote_rules = urlopen(url).read().decode('utf-8')
+
+def get_rules(url: str, dest: str, ipcidr: bool = False):
+    rules = []
+    remote_rules = urlopen(url).read().decode('utf-8')
     for line in remote_rules.split('\n'):
-        if line.startswith('#'):
-            f.write(f'{line}\n')
-        elif 'no-resolve' in line:
-            f.write(f'- {line}\n')
-        elif len(line):
-            f.write(f'- {line},{rule_name}\n')
+        if (line := line.strip().replace("'", '')).startswith('-'):
+            if not ipcidr:
+                if 'no-resolve' in line:
+                    rules.append(f'- {",".join(line[2:].split(",")[:2])},{dest},no-resolve')
+                else:
+                    rules.append(f'{line},{dest}')
+            else:
+                rules.append(f'- IP-CIDR,{line[2:]},{dest}')
+    return rules
 
 def dns_query(url: str, doh_url: str = DEFAULT_DOH_URL) -> str:
     # TODO: Support ipv6
