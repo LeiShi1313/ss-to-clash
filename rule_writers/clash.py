@@ -97,13 +97,12 @@ class ClashWriter(RuleWriter):
                 f.write(f'  - "{proxy.name}"\n')
             f.write('\n')
 
-        # Write China rules
-        if Region.CN in self.proxies_by_region:
-            f.write('- name: China\n')
-            f.write('  type: select\n')
-            f.write('  proxies:\n')
-            f.write('  - {}\n'.format(Region.CN))
-            f.write('  - DIRECT\n')
+        # Write Hijack rules
+        f.write('- name: Reject\n')
+        f.write('  type: select\n')
+        f.write('  proxies:\n')
+        f.write('  - REJECT\n')
+        f.write('  - DIRECT\n')
 
         # Write Proxy rules
         f.write('- name: Proxy\n')
@@ -112,21 +111,24 @@ class ClashWriter(RuleWriter):
         f.write('  - DIRECT\n')
         for region, _ in self.proxies_by_region.items():
             f.write(f'  - {region}\n')
-        
-        # Write Hijack rules
-        f.write('- name: Reject\n')
+
+        # Write China rules
+        f.write('- name: China\n')
         f.write('  type: select\n')
         f.write('  proxies:\n')
-        f.write('  - REJECT\n')
+        if Region.CN in self.proxies_by_region:
+            f.write('  - {}\n'.format(Region.CN))
         f.write('  - DIRECT\n')
+        f.write('  - Proxy\n')
 
         # Write Match rules
         f.write('- name: Match\n')
         f.write('  type: select\n')
         f.write('  proxies:\n')
+        f.write('  - Proxy\n')
         f.write('  - DIRECT\n')
-        for region, _ in self.proxies_by_region.items():
-            f.write(f'  - {region}\n')
+        if Region.CN in self.proxies_by_region:
+            f.write('  - {}\n'.format(Region.CN))
 
     def write_rule_providers(self, f: typing.IO):
         f.write('rule-providers:\n')
@@ -201,7 +203,8 @@ class ClashWriter(RuleWriter):
             print(f"Writing proxies.")
             self.write_proxies(f)
             print(f"Writing rule providers.")
-            self.write_rule_providers(f)
+            if not self.args.get('no_rule_set'):
+                self.write_rule_providers(f)
             print(f"Writing rules mode={self.args.get('mode')}.")
             if self.args.get('mode') == 'Script':
                 self.write_script(f)

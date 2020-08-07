@@ -16,6 +16,7 @@ from rules import RuleType, RuleBase, SSRule, SSRRule, Region
 def decode_subs(subs: list, **kwargs):
     decoded_subs = []
     hashed_subs = set()
+    hashed_names = set()
     print(f"Decoding a total of {len(subs)} subs.")
     if kwargs.get('use_ip'):
         print(f"Use ip turned on, this will take a while...")
@@ -23,7 +24,11 @@ def decode_subs(subs: list, **kwargs):
         for decoder in Decoder.decoders:
             if (rule := decoder.decode(line, **kwargs)) is not None:
                 if rule.get_hash() not in hashed_subs:
+                    if str(rule.name) in hashed_names:
+                        print(f'{rule} has duplicated name, skippping...')
+                        continue
                     hashed_subs.add(rule.get_hash())
+                    hashed_names.add(str(rule.name))
                     decoded_subs.append(rule)
                 break
         else:
@@ -66,6 +71,8 @@ if __name__ == '__main__':
                         help='是否查询并使用服务器IP地址')
     clash_arg_group.add_argument('--no-rule-set', type=str2bool, nargs='?', const=True, default=False,
                         help='是否使用RULE-SET')
+    clash_arg_group.add_argument('--rename', type=str2bool, nargs='?', const=True, default=False,
+                        help='是否重命名节点，开启将按`emoji 地区 001`格式重命名节点')
 
 
     main(parser.parse_args())

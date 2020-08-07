@@ -1,6 +1,7 @@
 import json
 from enum import Enum, unique
 from dataclasses import dataclass
+from collections import defaultdict
 
 
 @unique
@@ -27,23 +28,37 @@ class Region(Enum):
     KR = ('🇰🇷', '韩国', 5)
     US = ('🇺🇸', '美国', 6)
     SG = ('🇸🇬', '新加坡', 7)
-    EU = ('🇪🇺', '欧洲', 8)
-    AR = ('🇦🇷', '阿根廷', 9)
-    RU = ('🇷🇺', '俄罗斯', 10)
-    IN = ('🇮🇳', '印度', 11)
-    BR = ('🇧🇷', '巴西', 12)
-    OTHERS = ('😯', '其他', 13)
+    UK = ('🇬🇧', '英国', 8)
+    DE = ('🇩🇪', '德国', 9)
+    IT = ('🇮🇹', '意大利', 10)
+    FR = ('🇫🇷', '法国', 11)
+    TR = ('🇹🇷', '土耳其', 12)
+    AR = ('🇦🇷', '阿根廷', 13)
+    RU = ('🇷🇺', '俄罗斯', 14)
+    IN = ('🇮🇳', '印度', 15)
+    BR = ('🇧🇷', '巴西', 16)
+    CA = ('🇨🇦', '加拿大', 17)
+    OTHERS = ('😯', '其他', 99)
 
     def __str__(self):
         return f"{self.value[0]} {self.value[1]}"
 
 
 class RuleName:
-    def __init__(self, name, rule_type: RuleType):
+    region_count = defaultdict(int)
+
+    def __init__(self, name, rule_type: RuleType = RuleType.UNKNOWN, rename: bool = False):
         self.original_name = name.strip(" \t\n")
-        self.region = RuleName.get_region(name)
-        self.name = RuleName.stripe_name(name)
         self.rule_type = rule_type
+
+        self.name = RuleName.stripe_name(name)
+
+        self.region = RuleName.get_region(name)
+        self.region_count[self.region] += 1
+        self.renamed_name = RuleName.rename_by_region_count(self.name, self.region)
+
+        self.repr_name = self.name if not rename else self.renamed_name
+
 
     @classmethod
     def get_region(cls, name: str) -> Region:
@@ -54,11 +69,17 @@ class RuleName:
             (["中国-韩国", "韩国", "韓國", "KR"], Region.KR),
             (["中国-美国", "美国", "美國", "USA", " US "], Region.US),
             (["中国-新加坡", "新加坡", "SG"], Region.SG),
-            (["中国-英国", "英国", "英國", "法国", "法國", "意大利", "義大利", "德国", "德國"], Region.EU),
+            (["中国-英国", "英国", "英國"], Region.UK),
+            (["德国", "德國"], Region.DE),
+            (["法国", "法國"], Region.FR),
+            (["意大利", "義大利"], Region.IT),
+            (["法国", "法國"], Region.FR),
+            (["土耳其"], Region.TR),
             (["中国-阿根廷", "阿根廷"], Region.AR),
             (["中国-俄罗斯", "俄罗斯", "俄羅斯"], Region.RU),
             (["中国-印度", "印度"], Region.IN),
-            (["中国-巴西", "巴西"], Region.BR)
+            (["中国-巴西", "巴西"], Region.BR),
+            (["加拿大"], Region.CA)
         ], [
             (["回国"], Region.CN)
         ]]
@@ -76,8 +97,22 @@ class RuleName:
             name = name.replace(rule, '')
         return name.strip()
 
+    @classmethod
+    def rename_by_region_count(cls, name: str, region: Region) -> str:
+        if region != Region.OTHERS and region != region.UNKNOWN:
+            return f'{region.value[1]} {cls.region_count[region]:03}'
+        return name
+
+    def get_emoji(self):
+        emojis = [self.region.value[0]]
+        if any(n in self.name.lower() for n in ["音乐", "music"]):
+            emojis.append("🎵")
+        if any(n in self.name.lower() for n in ["流媒体", "netflix", "hbo", "hulu"]):
+            emojis.append("📺")
+        return '|'.join(emojis)
+
     def __repr__(self) -> str:
-        return f"{self.region.value[0]} {self.name} {self.rule_type.value.upper()}"
+        return f"{self.get_emoji()} {self.repr_name} {self.rule_type.value.upper()}"
 
 
 @dataclass
