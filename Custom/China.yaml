@@ -47,6 +47,7 @@ payload:
 - DOMAIN-SUFFIX,qy.net
 - DOMAIN-SUFFIX,ppstream.com
 - DOMAIN-SUFFIX,qchannel01.cn
+- DOMAIN-SUFFIX,a.akamaiedge.net
 - DOMAIN-KEYWORD,qiyi
 - IP-CIDR,101.227.0.0/16
 - IP-CIDR,101.224.0.0/13
