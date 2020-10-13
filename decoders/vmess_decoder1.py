@@ -11,10 +11,11 @@ from utils import dns_query
 
 class VmessDecoder9(Decoder):
     def decode(self, sub: str, **kwargs) -> VmessRule:
-        regex = re.compile(r"^vmess://(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$")
-        if m := regex.match(sub):
+        if sub.startswith("vmess"):
             try:
                 decoded_rule = json.loads(urlsafe_b64decode(sub[8:]).decode('utf-8'))
+                if decoded_rule.get('v') != '2':
+                    return None
                 extra_params = {
                     'network': decoded_rule.get('net'),
                     'ws_path': decoded_rule.get('path'),

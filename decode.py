@@ -21,6 +21,8 @@ def decode_subs(subs: list, **kwargs):
     if kwargs.get('use_ip'):
         print(f"Use ip turned on, this will take a while...")
     for line in subs:
+        if line.startswith('#'):
+            continue
         for decoder in Decoder.decoders:
             if (rule := decoder.decode(line, **kwargs)) is not None:
                 if rule.get_hash() not in hashed_subs:
@@ -41,6 +43,7 @@ def main(args):
     subs = []
     with open(args.ss_file_path, 'r') as f:
         for line in f.readlines():
+            line = line.strip()
             if len(line) > 1:
                 subs.append(line)
 
@@ -71,8 +74,10 @@ if __name__ == '__main__':
                         help='是否查询并使用服务器IP地址')
     clash_arg_group.add_argument('--no-rule-set', type=str2bool, nargs='?', const=True, default=False,
                         help='是否使用RULE-SET')
-    clash_arg_group.add_argument('--rename', type=str2bool, nargs='?', const=True, default=False,
-                        help='是否重命名节点，开启将按`emoji 地区 001`格式重命名节点')
+    clash_arg_group.add_argument('--speedtest-rule', type=str2bool, nargs='?', const=True, default=False,
+                        help='是否添加speedtest专用规则')
+    clash_arg_group.add_argument('--rename', type=int, nargs='?', const=1, default=0,
+                        help='是否重命名节点，2则在原有名称最后按地区，默认(1)则按`emoji 地区 001`格式重命名节点')
 
 
     main(parser.parse_args())

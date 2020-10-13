@@ -17,8 +17,8 @@ class SSREncoder(Encoder):
                     f":{sub.get('password', '')}",
                     "/?",
                     urlencode({
-                        'obfsparam': urlsafe_b64encode(sub.get('obfsparam', '').encode('utf-8')).decode('utf-8'),
-                        'protoparam': urlsafe_b64encode(sub.get('protoparam', '').encode('utf-8')).decode('utf-8'),
+                        'obfsparam': urlsafe_b64encode(sub.get('obfs-param', '').encode('utf-8')).decode('utf-8'),
+                        'protoparam': urlsafe_b64encode(sub.get('protocol-param', '').encode('utf-8')).decode('utf-8'),
                         'remarks': urlsafe_b64encode(sub.get('name', '').encode('utf-8')).decode('utf-8'),
                         'group': urlsafe_b64encode(sub.get('group', '').encode('utf-8')).decode('utf-8'),
                     })

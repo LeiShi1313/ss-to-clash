@@ -53,7 +53,6 @@ CHINA_RULE_PROVIDERS = {
     # '🀄️ ChinaCompanyIp': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaCompanyIp.yaml',
     '🀄️ ChinaIp': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaIp.yaml',
     '🀄️ ChinaCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/China.yaml',
-    # '🀄️ ChinaCustom': 'http://192.168.1.13/created/ss-to-clash/Custom/China.yaml',
 }
 PROXY_RULE_PROVIDERS = {
     '✈️ ProxyLite': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyLite.yaml',
@@ -84,11 +83,11 @@ class ClashWriter(RuleWriter):
 
         f.write('\nproxy-groups:\n')
         for region, proxies in self.proxies_by_region.items():
-            if self.args.get('mode') == 'fallback' or self.args.get('mode') == 'urltest':
+            if self.args.get('node_mode') == 'fallback' or self.args.get('node_mode') == 'urltest':
                 f.write(f'- name: {region}\n')
-                f.write(f'  type: {self.args.get("mode")}\n')
+                f.write(f'  type: {self.args.get("node_mode")}\n')
                 f.write(f'  url: "http://www.gstatic.com/generate_204"\n')
-                f.write(f'  interval: {self.args.get("interval")}\n')
+                f.write(f'  interval: {self.args.get("node_interval")}\n')
             else:
                 f.write(f'- name: {region}\n')
                 f.write(f'  type: select\n')
@@ -120,6 +119,15 @@ class ClashWriter(RuleWriter):
             f.write('  - {}\n'.format(Region.CN))
         f.write('  - DIRECT\n')
         f.write('  - Proxy\n')
+
+        # Write Speedtest rules
+        if self.args.get('speedtest_rule'):
+            f.write('- name: Speedtest\n')
+            f.write('  type: select\n')
+            f.write('  proxies:\n')
+            f.write('  - DIRECT\n')
+            for region, _ in self.proxies_by_region.items():
+                f.write(f'  - {region}\n')
 
         # Write Match rules
         f.write('- name: Match\n')
@@ -181,6 +189,9 @@ class ClashWriter(RuleWriter):
                 else:
                     for rule in get_rules(rule_link, dest, 'ip' in name.lower()):
                         f.write(f'{rule}\n')
+        if self.args.get('speedtest_rule'):
+            f.write('# Speedtest\n')
+            f.write('- DOMAIN-KEYWORD,speedtest,Speedtest\n')
 
         f.write('# 其他流量\n')
         f.write('- MATCH,Match\n')

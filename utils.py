@@ -16,8 +16,6 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-def write_rule_from_list(self, f: typing.IO, url: str, rule_name: str):
-    remote_rules = urlopen(url).read().decode('utf-8')
 
 def get_rules(url: str, dest: str, ipcidr: bool = False):
     rules = []

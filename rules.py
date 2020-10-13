@@ -47,7 +47,7 @@ class Region(Enum):
 class RuleName:
     region_count = defaultdict(int)
 
-    def __init__(self, name, rule_type: RuleType = RuleType.UNKNOWN, rename: bool = False):
+    def __init__(self, name, rule_type: RuleType = RuleType.UNKNOWN, rename: int = 0):
         self.original_name = name.strip(" \t\n")
         self.rule_type = rule_type
 
@@ -55,9 +55,13 @@ class RuleName:
 
         self.region = RuleName.get_region(name)
         self.region_count[self.region] += 1
-        self.renamed_name = RuleName.rename_by_region_count(self.name, self.region)
+        self.renamed_name = self.name
+        if rename == 1:
+            self.renamed_name = RuleName.rename_by_region_count(self.name, self.region)
+        elif rename == 2:
+            self.renamed_name = RuleName.rename_by_add_count(self.name, self.region)
 
-        self.repr_name = self.name if not rename else self.renamed_name
+        self.repr_name = self.renamed_name if rename > 0 else self.name
 
 
     @classmethod
@@ -81,7 +85,7 @@ class RuleName:
             (["中国-巴西", "巴西"], Region.BR),
             (["加拿大"], Region.CA)
         ], [
-            (["回国"], Region.CN)
+            (["回国", " 中国 "], Region.CN)
         ]]
 
         for tier_patterns in patterns_by_tier:
@@ -99,9 +103,11 @@ class RuleName:
 
     @classmethod
     def rename_by_region_count(cls, name: str, region: Region) -> str:
-        if region != Region.OTHERS and region != region.UNKNOWN:
-            return f'{region.value[1]} {cls.region_count[region]:03}'
-        return name
+        return f'{region.value[1]} {cls.region_count[region]:03}'
+
+    @classmethod
+    def rename_by_add_count(cls, name: str, region: Region) -> str:
+        return f'{name} {cls.region_count[region]:03}'
 
     def get_emoji(self):
         emojis = [self.region.value[0]]

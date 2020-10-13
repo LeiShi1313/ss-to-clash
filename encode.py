@@ -12,14 +12,15 @@ def main(args):
         for proxy in config.get('proxies', []):
             for encoder in Encoder.encoders:
                 if (encoded_proxy := encoder.encode(proxy)) is not None:
-                    proxies.append(encoded_proxy)
+                    proxies.append((proxy['name'], encoded_proxy))
                     break
             else:
                 print("No encoder found for: ", proxy)
     if len(proxies):
         with open(args.output_file_name, 'w') as f:
             for proxy in proxies:
-                f.write(f'{proxy}\n')
+                f.write(f'# {proxy[0]}\n')
+                f.write(f'{proxy[1]}\n')
         print(f'Wrote a total of {len(proxies)} proxies.')
 
 
