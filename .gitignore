@@ -130,3 +130,6 @@ dmypy.json
 
 *.txt
 clash*.yml
+clash*.yaml
+test*.yml
+test*.json

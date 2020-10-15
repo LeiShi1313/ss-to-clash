@@ -2,6 +2,8 @@ import typing
 from urllib import request
 from collections import defaultdict
 
+import yaml
+
 from utils import get_rules
 from rules import Region, RuleBase
 from rule_writers.base import RuleWriter
@@ -37,29 +39,6 @@ for src_ip in allow_geo_ips:
         return "China"
 '''
 
-DIRECT_RULE_PROVIDERS = {
-    '🏠 LocalAreaNetwork': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/LocalAreaNetwork.yaml',
-    '🏠 DirectCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Direct.yaml',
-}
-REJECT_RULE_PROVIDERS = {
-    '🈲️ BanAD': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanAD.yaml',
-    # '🈲️ BanEasyList': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyList.yaml',
-    # '🈲️ BanEasyListChina': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanEasyListChina.yaml',
-    # '🈲️ BanProgramAD': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/BanProgramAD.yaml',
-    # '🈲️ BanCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Ban.yaml',
-}
-CHINA_RULE_PROVIDERS = {
-    # '🀄️ ChinaDomain': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaDomain.yaml',
-    # '🀄️ ChinaCompanyIp': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaCompanyIp.yaml',
-    '🀄️ ChinaIp': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ChinaIp.yaml',
-    '🀄️ ChinaCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/China.yaml',
-}
-PROXY_RULE_PROVIDERS = {
-    '✈️ ProxyLite': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyLite.yaml',
-    '✈️ ProxyGFWList': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyGFWlist.yaml',
-    '✈️ ProxyMedia': 'https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Providers/ProxyMedia.yaml',
-    # '✈️ ProxyCustom': 'https://raw.githubusercontent.com/LeiShi1313/ss-to-clash/master/Custom/Proxy.yaml',
-}
 SCRIPT_RULE_PROVIDERS = {
     '💻 ScriptCustom': './Custom/Script.yaml',
 }
@@ -102,6 +81,7 @@ class ClashWriter(RuleWriter):
         f.write('  proxies:\n')
         f.write('  - REJECT\n')
         f.write('  - DIRECT\n')
+        f.write('\n')
 
         # Write Proxy rules
         f.write('- name: Proxy\n')
@@ -110,6 +90,7 @@ class ClashWriter(RuleWriter):
         f.write('  - DIRECT\n')
         for region, _ in self.proxies_by_region.items():
             f.write(f'  - {region}\n')
+        f.write('\n')
 
         # Write China rules
         f.write('- name: China\n')
@@ -119,15 +100,17 @@ class ClashWriter(RuleWriter):
             f.write('  - {}\n'.format(Region.CN))
         f.write('  - DIRECT\n')
         f.write('  - Proxy\n')
+        f.write('\n')
 
-        # Write Speedtest rules
-        if self.args.get('speedtest_rule'):
-            f.write('- name: Speedtest\n')
+        # Write custom rules
+        for custom_rule_name in self.config.get('CustomProxyGroup', {}).keys():
+            f.write('- name: {}\n'.format(custom_rule_name))
             f.write('  type: select\n')
             f.write('  proxies:\n')
             f.write('  - DIRECT\n')
             for region, _ in self.proxies_by_region.items():
                 f.write(f'  - {region}\n')
+            f.write('\n')
 
         # Write Match rules
         f.write('- name: Match\n')
@@ -137,68 +120,81 @@ class ClashWriter(RuleWriter):
         f.write('  - DIRECT\n')
         if Region.CN in self.proxies_by_region:
             f.write('  - {}\n'.format(Region.CN))
+        f.write('\n')
 
     def write_rule_providers(self, f: typing.IO):
         f.write('rule-providers:\n')
-        for rule_providers in [REJECT_RULE_PROVIDERS, CHINA_RULE_PROVIDERS, PROXY_RULE_PROVIDERS, DIRECT_RULE_PROVIDERS]:
-            for name, url in rule_providers.items():
-                f.write(f'  {name}:\n')
-                f.write(f'    type: http\n')
-                f.write(f'    url: {url}\n')
-                f.write(f'    path: ./Providers/{name}.yaml\n')
-                f.write(f'    interval: {self.args.get("rule_provider_interval")}\n')
-                f.write(f'    behavior: {"ipcidr" if "ip" in name.lower() else "classical"}\n')
-        f.write('\n')
+        for key in ['DefaultProxyGroup', 'CustomProxyGroup']:
+            for rule_name, rule in self.config.get(key, {}).items():
+                for rule_provider in rule.get('RuleProviders', {}):
+                    for name, url in rule_provider.items():
+                        f.write(f'  {name}:\n')
+                        f.write(f'    type: http\n')
+                        f.write(f'    url: {url}\n')
+                        f.write(f'    path: ./Providers/{name}.yaml\n')
+                        f.write(f'    interval: {self.args.get("rule_provider_interval")}\n')
+                        f.write(f'    behavior: {"ipcidr" if "ip" in name.lower() else "classical"}\n')
+            f.write('\n')
 
-    def write_script(self, f: typing.IO):
-        f.write('script:\n')
-        f.write('  code: |\n')
-        f.write('    def main(ctx, metadata):\n')
-        f.write(f'      # Custom rules\n')
-        for line in CUSTOM_SCRIPT.split('\n'):
-            if len(line):
-                f.write(f'      {line}\n')
-        f.write(f'      # Default rules\n')
-        for name in DIRECT_RULE_PROVIDERS.keys():
-            f.write(f'      if ctx.rule_providers["{name}"].match(metadata):\n')
-            f.write(f'        ctx.log("[Script] %s matched {name} using DIRECT" % metadata["host"])\n')
-            f.write(f'        return "DIRECT"\n')
-        for name in REJECT_RULE_PROVIDERS.keys():
-            f.write(f'      if ctx.rule_providers["{name}"].match(metadata):\n')
-            f.write(f'        ctx.log("[Script] %s matched {name} using Reject" % metadata["host"])\n')
-            f.write(f'        return "Reject"\n')
-        for name in CHINA_RULE_PROVIDERS.keys():
-            f.write(f'      if ctx.rule_providers["{name}"].match(metadata):\n')
-            f.write(f'        ctx.log("[Script] %s matched {name} using China" % metadata["host"])\n')
-            f.write(f'        return "China"\n')
-        for name in PROXY_RULE_PROVIDERS.keys():
-            f.write(f'      if ctx.rule_providers["{name}"].match(metadata):\n')
-            f.write(f'        ctx.log("[Script] %s matched {name} using Proxy" % metadata["host"])\n')
-            f.write(f'        return "Proxy"\n')
-        f.write(f'      return "Match"\n')
-        f.write(f'rules:\n')
+    # def write_script(self, f: typing.IO):
+    #     f.write('script:\n')
+    #     f.write('  code: |\n')
+    #     f.write('    def main(ctx, metadata):\n')
+    #     f.write(f'      # Custom rules\n')
+    #     for line in CUSTOM_SCRIPT.split('\n'):
+    #         if len(line):
+    #             f.write(f'      {line}\n')
+    #     f.write(f'      # Default rules\n')
+    #     for name in DIRECT_RULE_PROVIDERS.keys():
+    #         f.write(f'      if ctx.rule_providers["{name}"].match(metadata):\n')
+    #         f.write(f'        ctx.log("[Script] %s matched {name} using DIRECT" % metadata["host"])\n')
+    #         f.write(f'        return "DIRECT"\n')
+    #     for name in REJECT_RULE_PROVIDERS.keys():
+    #         f.write(f'      if ctx.rule_providers["{name}"].match(metadata):\n')
+    #         f.write(f'        ctx.log("[Script] %s matched {name} using Reject" % metadata["host"])\n')
+    #         f.write(f'        return "Reject"\n')
+    #     for name in CHINA_RULE_PROVIDERS.keys():
+    #         f.write(f'      if ctx.rule_providers["{name}"].match(metadata):\n')
+    #         f.write(f'        ctx.log("[Script] %s matched {name} using China" % metadata["host"])\n')
+    #         f.write(f'        return "China"\n')
+    #     for name in PROXY_RULE_PROVIDERS.keys():
+    #         f.write(f'      if ctx.rule_providers["{name}"].match(metadata):\n')
+    #         f.write(f'        ctx.log("[Script] %s matched {name} using Proxy" % metadata["host"])\n')
+    #         f.write(f'        return "Proxy"\n')
+    #     f.write(f'      return "Match"\n')
+    #     f.write(f'rules:\n')
 
     def write_rules(self, f: typing.IO):
         f.write('rules:\n')
-
-        for dest, rule_providers in zip(['DIRECT', 'Reject', 'China', 'Proxy'], [DIRECT_RULE_PROVIDERS, REJECT_RULE_PROVIDERS, CHINA_RULE_PROVIDERS, PROXY_RULE_PROVIDERS]):
-            for name, rule_link in rule_providers.items():
-                f.write(f'# {name}\n')
-                if not self.args.get('no_rule_set'):
-                    f.write(f'- RULE-SET,{name},{dest}\n')
-                else:
-                    for rule in get_rules(rule_link, dest, 'ip' in name.lower()):
-                        f.write(f'{rule}\n')
-        if self.args.get('speedtest_rule'):
-            f.write('# Speedtest\n')
-            f.write('- DOMAIN-KEYWORD,speedtest,Speedtest\n')
+        for key in ['DefaultProxyGroup', 'CustomProxyGroup']:
+            for rule_name, rule in self.config.get(key, {}).items():
+                for rule_provider in rule.get('RuleProviders', {}):
+                    for name, rule_link in rule_provider.items():
+                        f.write(f'# {name}\n')
+                        if not self.args.get('no_rule_set'):
+                            f.write(f'- RULE-SET,{name},{rule_name}\n')
+                        else:
+                            for rule in get_rules(rule_link, rule_name, 'ip' in name.lower()):
+                                f.write(f'{rule}\n')
+                for one_rule in rule.get('CustomRules', {}):
+                    f.write(f'- {one_rule},{rule_name}\n')
 
         f.write('# 其他流量\n')
         f.write('- MATCH,Match\n')
 
     def write(self, proxies: typing.List[RuleBase], **kwargs):
         self.args = kwargs
+        if self.args.get('mode') == 'Script':
+            print("Script mode is not supported right now!")
+            return 
         self.proxies_by_region = defaultdict(list)
+        with open('rule_writers/clash_config.yml', 'r') as f:
+            try:
+                self.config = yaml.safe_load(f)
+            except yaml.YAMLError as exc:
+                print(exc)
+                return 
+
         for proxy in proxies:
             self.proxies_by_region[proxy.name.region].append(proxy)
 
@@ -217,8 +213,8 @@ class ClashWriter(RuleWriter):
             if not self.args.get('no_rule_set'):
                 self.write_rule_providers(f)
             print(f"Writing rules mode={self.args.get('mode')}.")
-            if self.args.get('mode') == 'Script':
-                self.write_script(f)
-            else:
-                self.write_rules(f)
+            # if self.args.get('mode') == 'Script':
+            #     self.write_script(f)
+            # else:
+            self.write_rules(f)
         print(f"Done!")

@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "decode.py",
+            "args": ["test.txt", "clash", "--output-name", "test.yml"],
+            "console": "integratedTerminal"
+        },{
+            "name": "Python: Vmess File",
+            "type": "python",
+            "request": "launch",
+            "program": "decode.py",
+            "args": ["vmess.txt", "clash", "--output-name", "clash_vmess.yml"],
+            "console": "integratedTerminal"
+        },{
+            "name": "Python: encode",
+            "type": "python",
+            "request": "launch",
+            "program": "encode.py",
+            "args": ["test.yml", "test_encode.txt"],
+            "console": "integratedTerminal"
+        }
+    ]
+}
