@@ -26,6 +26,9 @@ payload:
 - DOMAIN-SUFFIX,im9.com
 - DOMAIN-SUFFIX,smtcdns.net
 - IP-CIDR,203.107.0.0/16
+# > Douyu
+- DOMAIN-SUFFIX,douyu.com
+- DOMAIN-SUFFIX,douyucdn.cn
 # > HunanTV
 # USER-AGENT,MGTV*
 - DOMAIN-SUFFIX,hitv.com
