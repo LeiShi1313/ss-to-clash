@@ -174,8 +174,8 @@ class ClashWriter(RuleWriter):
                         if not self.args.get('no_rule_set'):
                             f.write(f'- RULE-SET,{name},{rule_name}\n')
                         else:
-                            for rule in get_rules(rule_link, rule_name, 'ip' in name.lower()):
-                                f.write(f'{rule}\n')
+                            for one_rule in get_rules(rule_link, rule_name, 'ip' in name.lower()):
+                                f.write(f'{one_rule}\n')
                 for one_rule in rule.get('CustomRules', {}):
                     f.write(f'- {one_rule},{rule_name}\n')
 
